@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PeopleController;
+use Illuminate\Http\Request;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +19,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+Route::get("/users", [PeopleController::class, 'index']);
+
+Route::post("/create/people", [PeopleController::class, 'create']);
+
+Route::put("/create/people/{id}", [PeopleController::class, 'update']);
+
+Route::delete("/create/people/{id}", [PeopleController::class, 'destroy']);
