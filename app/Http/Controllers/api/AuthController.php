@@ -13,25 +13,29 @@ use JWTAuth;
 class AuthController extends Controller
 {   
     // Login
-    public function authenticate(Request $request)
+    public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-    
+
         try {
-            if (! $token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'invalid_credentials'], 400);
+            if (!$token = JWTAuth::attempt($credentials)) {
+                return (["message"=>"Credenciales Inválidas", Response::HTTP_UNAUTHORIZED]);
+                // return response()->json(['error' => 'invalid_credentials'], 400);
             }
         } catch (JWTException $e) {
+            //return (["message"=>"could_not_create_token", 500]);
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
     
         // Obtener el usuario autenticado
         $user = JWTAuth::user();
+
+        $cookie = cookie('authToken', $token, 60*24);
     
         // Si deseas retornar todos los datos del usuario desde la base de datos
         // Descomenta la siguiente línea:
-        //$user = User::find($user->id);
-        return response(['user' => $user, 'token' => $token], Response::HTTP_OK);
+        $user = User::find($user->id);
+        return response(['user' => $user, 'token' => $token, 'cookie'=> $cookie], Response::HTTP_OK);
     }
     
     // Validar autenticacion de usuario logueado en el sistema
@@ -55,7 +59,6 @@ class AuthController extends Controller
     // Registro de Usuarios en el sistema
     public function register(Request $request)
     {
-        $data = $request->all();
 
         $validator = Validator::make($request->all(), [
         'name' => 'required|string|max:255',
@@ -67,10 +70,26 @@ class AuthController extends Controller
             return response()->json($validator->errors()->toJson(), 400);
         }
 
-        $user = User::create($data);
+        $user = User::create([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => bcrypt($request->input('password')),
+        ]);
 
         $token = JWTAuth::fromUser($user);
 
         return response(['user' => $user, 'token' => $token], Response::HTTP_CREATED);
+    }
+
+    public function logout(Request $request)
+    {
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken());
+            // Si deseas eliminar la cookie de autenticación también, puedes hacerlo aquí
+            // $cookie = \Cookie::forget('authToken');
+            return response()->json(['message' => 'Logout exitoso'], 200);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'could_not_invalidate_token'], 500);
+        }
     }
 }
