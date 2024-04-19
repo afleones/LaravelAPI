@@ -11,5 +11,11 @@ use Illuminate\Http\Response;
 
 class UserController extends Controller
 {   
-    
+    public function users()
+    {
+        $users = User::all();
+
+        return response()->json(['users' => $users], 200);
+
+    }
 }
