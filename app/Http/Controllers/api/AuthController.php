@@ -21,7 +21,10 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return response()->json(['token' => $token], 200);
+        $user = Auth::user();
+        $cookie = cookie('authToken', $token, 60*24);
+
+        return response()->json(['user'=> $user,'token' => $token], 200)->withoutCookie($cookie);
     }
 
     public function me()
