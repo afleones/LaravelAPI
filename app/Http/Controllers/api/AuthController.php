@@ -3,41 +3,44 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth; // Asegúrate de importar el alias correcto
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Response;
 use App\Models\User;
-use JWTAuth;
 
 class AuthController extends Controller
 {   
-    // Login
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
 
-        try {
-            if (!$token = JWTAuth::attempt($credentials)) {
-                return (["message"=>"Credenciales Inválidas", Response::HTTP_UNAUTHORIZED]);
-                // return response()->json(['error' => 'invalid_credentials'], 400);
-            }
-        } catch (JWTException $e) {
-            //return (["message"=>"could_not_create_token", 500]);
-            return response()->json(['error' => 'could_not_create_token'], 500);
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
-    
-        // Obtener el usuario autenticado
-        $user = JWTAuth::user();
 
-        $cookie = cookie('authToken', $token, 60*24);
-    
-        // Si deseas retornar todos los datos del usuario desde la base de datos
-        // Descomenta la siguiente línea:
-        $user = User::find($user->id);
-        return response(['user' => $user, 'token' => $token, 'cookie'=> $cookie], Response::HTTP_OK);
+        return response()->json(['token' => $token], 200);
     }
-    
+
+    public function me()
+    {
+        return response()->json(Auth::user());
+    }
+
+    public function logout()
+    {
+        Auth::logout();
+
+        return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    public function refresh()
+    {
+        return response()->json(['token' => JWTAuth::refresh()]);
+    }
+
     // Validar autenticacion de usuario logueado en el sistema
     public function getAuthenticatedUser()
     {
@@ -59,37 +62,24 @@ class AuthController extends Controller
     // Registro de Usuarios en el sistema
     public function register(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:8|confirmed',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
-        if($validator->fails()){
-            return response()->json($validator->errors()->toJson(), 400);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
         }
 
         $user = User::create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' => bcrypt($request->input('password')),
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
         ]);
 
         $token = JWTAuth::fromUser($user);
 
-        return response(['user' => $user, 'token' => $token], Response::HTTP_CREATED);
-    }
-
-    public function logout(Request $request)
-    {
-        try {
-            JWTAuth::invalidate(JWTAuth::getToken());
-            // Si deseas eliminar la cookie de autenticación también, puedes hacerlo aquí
-            // $cookie = \Cookie::forget('authToken');
-            return response()->json(['message' => 'Logout exitoso'], 200);
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'could_not_invalidate_token'], 500);
-        }
+        return response()->json(['token' => $token], 201);
     }
 }

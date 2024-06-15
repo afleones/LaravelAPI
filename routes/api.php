@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\TeamsController;
+use App\Http\Controllers\StockController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,11 +18,16 @@ use App\Http\Controllers\TeamsController;
 |
 */
 
-Route::post('register', [AuthController::class, 'register']); /* Registrarse */
-Route::post('login', [AuthController::class, 'login']); /* Iniciar Sesion */
+Route::post('login', [AuthController::class, 'login']);
 
+Route::middleware('auth:api')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('me', [AuthController::class, 'me']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
 
-Route::group(['middleware' => ['jwt.verify']], function() {
+    //D & C Comunicaciones
+        Route::post('StoreArticle', [StockController::class, 'StoreArticle']);
+    //D & C Comunicaciones
 
     Route::post('user', [AuthController::class, 'getAuthenticatedUser']);
     Route::post('logout', [AuthController::class, 'logout']);
@@ -31,4 +37,8 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::post('updateTeam', [TeamsController::class, 'update']);
     Route::post('deleteTeam', [TeamsController::class, 'delete']);
 
+
 });
+
+
+Route::post('register', [AuthController::class, 'register']); /* Registrarse */
