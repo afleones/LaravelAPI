@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('serial');
-            $table->string('supplier');
             $table->integer('quantities');
             $table->unsignedBigInteger('category_id'); // Aquí se define la clave foránea
             $table->unsignedBigInteger('supplier_id'); // Aquí se define la clave foránea
