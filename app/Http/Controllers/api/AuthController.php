@@ -30,13 +30,13 @@ class AuthController extends Controller
     
         // Si la validación falla, devolver los errores en formato JSON
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()->all()], 422);
+            return response()->json(['message' => $validator->errors()->all()], 422);
         }
     
         // Intentar autenticar al usuario con JWTAuth
         $credentials = $request->only('email', 'password');
         if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Credenciales incorrectas'], 401);
+            return response()->json(['message' => 'Credenciales incorrectas'], 401);
         }
     
         // Obtener el usuario autenticado
