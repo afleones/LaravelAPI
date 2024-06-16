@@ -24,7 +24,7 @@ return new class extends Migration
 
             // Definir la clave foránea
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
-            $table->foreign('supplier_id')->references('id')->on('Suppliers')->onDelete('cascade');
+            $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
 
         });
     }
