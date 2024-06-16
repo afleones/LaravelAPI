@@ -36,7 +36,7 @@ class AuthController extends Controller
         // Intentar autenticar al usuario con JWTAuth
         $credentials = $request->only('email', 'password');
         if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(['message' => 'Credenciales incorrectas'], 401);
+            return response()->json(['message' => 'Credenciales incorrectas, verifique sus datos e intentelo nuevamente'], 401);
         }
     
         // Obtener el usuario autenticado
