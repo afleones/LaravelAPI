@@ -88,8 +88,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-    
-        // Devolver respuesta con el token de JWT en español
-        return response()->json(['success' => 'Registro exitoso, por favor, inicie sesion con sus credenciales'], 201);
-    }
-}
+
+        // Devolver respuesta
+        return response()->json(['success' => 'Registro Exitoso, por favor inicie sesion.'], 201);
+    }}
