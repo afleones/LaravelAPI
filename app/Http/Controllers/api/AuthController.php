@@ -79,16 +79,11 @@ class AuthController extends Controller
         ]);
     
         if ($validator->fails()) {
-            // Obtener todos los mensajes de error en una sola variable
-            $errors = $validator->errors();
-            $errorMessage = '';
+            // Obtener todos los mensajes de error como un array
+            $errors = $validator->errors()->all();
     
-            foreach ($errors->all() as $message) {
-                $errorMessage .= $message . ' ';
-            }
-    
-            // Devolver respuesta con los mensajes de error en español
-            return response()->json(['message' => trim($errorMessage)], 422);
+            // Devolver respuesta con los mensajes de error en un array
+            return response()->json(['message' => $errors], 422);
         }
     
         $user = User::create([
@@ -96,7 +91,8 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-
-        // Devolver respuesta
-        return response()->json(['success' => 'Registro Exitoso, por favor inicie sesion.'], 201);
-    }}
+    
+        // Devolver respuesta de éxito
+        return response()->json(['success' => 'Registro Exitoso, por favor inicie sesión.'], 201);
+    }
+}
