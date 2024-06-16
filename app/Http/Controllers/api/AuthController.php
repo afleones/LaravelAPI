@@ -64,31 +64,22 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        // Definir reglas de validación sin mensajes personalizados
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
-        ]);
-    
+        ];
+
+        // Validar los datos con las reglas definidas
+        $validator = Validator::make($request->all(), $rules);
+
+        // Manejar los errores de validación
         if ($validator->fails()) {
-            // Obtener todos los mensajes de error en una sola variable
-            $errors = $validator->errors();
-            $errorMessage = '';
-    
-            foreach ($errors->all() as $message) {
-                $errorMessage .= $message . ' ';
-            }
-    
-            // Devolver respuesta con los mensajes de error en español
-            return response()->json(['message' => trim($errorMessage)], 422);
+            return response()->json($validator->errors(), 422);
         }
-    
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-    
-        // Devolver respuesta con el token de JWT en español
-        return response()->json(['success' => 'Registro exitoso, por favor, inicie sesion con sus credenciales'], 201);
+
+        // Lógica para registrar el usuario si la validación pasa
+
+        return response()->json(['message' => 'Usuario registrado exitosamente'], 201);
     }}
