@@ -15,18 +15,40 @@ class AuthController extends Controller
 {   
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
-
-        if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        // Definir mensajes de error en español
+        $messages = [
+            'email.required' => 'El campo correo electrónico es obligatorio.',
+            'email.email' => 'Debe ingresar un correo electrónico válido.',
+            'password.required' => 'El campo contraseña es obligatorio.',
+        ];
+    
+        // Validar los campos requeridos con los mensajes personalizados
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ], $messages);
+    
+        // Si la validación falla, devolver los errores en formato JSON
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()->all()], 422);
         }
-
+    
+        // Intentar autenticar al usuario con JWTAuth
+        $credentials = $request->only('email', 'password');
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json(['error' => 'Credenciales incorrectas'], 401);
+        }
+    
+        // Obtener el usuario autenticado
         $user = Auth::user();
+    
+        // Crear una cookie con el token si es necesario
         $cookie = cookie('authToken', $token, 60*24);
-
-        return response()->json(['user'=> $user,'token' => $token], 200)->withoutCookie($cookie);
+    
+        // Devolver la respuesta con el usuario y el token
+        return response()->json(['user' => $user, 'token' => $token], 200);
     }
-
+    
     public function me()
     {
         return response()->json(Auth::user());
