@@ -62,7 +62,6 @@ class AuthController extends Controller
             
     }
 
-    // Registro de Usuarios en el sistema
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -70,19 +69,26 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
         ]);
-
+    
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            // Obtener todos los mensajes de error en una sola variable
+            $errors = $validator->errors();
+            $errorMessage = '';
+    
+            foreach ($errors->all() as $message) {
+                $errorMessage .= $message . ' ';
+            }
+    
+            // Devolver respuesta con los mensajes de error en español
+            return response()->json(['message' => trim($errorMessage)], 422);
         }
-
+    
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-
-        $token = JWTAuth::fromUser($user);
-
-        return response()->json(['token' => $token], 201);
-    }
-}
+    
+        // Devolver respuesta con el token de JWT en español
+        return response()->json(['success' => 'Registro exitoso, por favor, inicie sesion con sus credenciales'], 201);
+    }}
