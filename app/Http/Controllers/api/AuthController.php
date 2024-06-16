@@ -39,16 +39,25 @@ class AuthController extends Controller
             return response()->json(['message' => 'Credenciales incorrectas, verifique sus datos e intentelo nuevamente'], 401);
         }
     
-        // Obtener el usuario autenticado
+        // Obtener el usuario autenticado con su rol
         $user = Auth::user();
     
-        // Crear una cookie con el token si es necesario
-        $cookie = cookie('authToken', $token, 60*24);
+        // Obtener nombre del rol del usuario
+        $roleName = $user->roles()->first(); // Suponiendo que la relación de roles está definida en el modelo User
     
-        // Devolver la respuesta con el usuario y el token
-        return response()->json(['message'=>'Bienvenido, usted ha iniciado sesion.', 'user' => $user, 'token' => $token], 200);
-    }
-    
+        // Devolver la respuesta con el usuario, el nombre del rol y el token
+        return response()->json([
+            'message' => 'Bienvenido, usted ha iniciado sesión.',
+            'user' => [
+                'id' => $user->id,
+                'email' => $user->email,
+                'idRole' => $roleName->id,
+                'roleName' => $roleName->name,
+                'roleDescription' => $roleName->description,
+            ],
+            'token' => $token,
+        ], 200);
+    }    
     public function me()
     {
         return response()->json(Auth::user());

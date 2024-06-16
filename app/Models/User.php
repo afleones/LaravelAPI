@@ -9,14 +9,13 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\Role;
 
 class User extends Authenticatable implements JWTSubject 
 {
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'users';  // Especifica el nombre de la tabla
-
-    protected $primaryKey = 'id';
     
     protected $fillable = [
         'name', 'email', 'password', // Agrega los campos name, email y password aquí
@@ -39,5 +38,16 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    // valida el rol del usuario al iniciar sesion
+    public function hasRole($roleName)
+    {
+        return $this->roles()->where('name', $roleName)->exists();
     }
 }
