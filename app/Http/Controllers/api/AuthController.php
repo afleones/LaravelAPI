@@ -46,7 +46,7 @@ class AuthController extends Controller
         $cookie = cookie('authToken', $token, 60*24);
     
         // Devolver la respuesta con el usuario y el token
-        return response()->json(['user' => $user, 'token' => $token], 200);
+        return response()->json(['message'=>'Bienvenido, usted ha iniciado sesion.', 'user' => $user, 'token' => $token], 200);
     }
     
     public function me()
