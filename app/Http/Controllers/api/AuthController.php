@@ -21,7 +21,7 @@ class AuthController extends Controller
             'email.email' => 'Debe ingresar un correo electrónico válido.',
             'password.required' => 'El campo contraseña es obligatorio.',
         ];
-    
+
         // Validar los campos requeridos con los mensajes personalizados
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
