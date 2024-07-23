@@ -1,129 +1,106 @@
-<?php   
-namespace App\Http\Controllers\api;
+<?php
+
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Tymon\JWTAuth\Exceptions\JWTException;
-use Tymon\JWTAuth\Facades\JWTAuth; // Asegúrate de importar el alias correcto
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Models\User;
+use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
-{   
+{
+    // Iniciar sesión y generar token JWT
     public function login(Request $request)
     {
-        // Definir mensajes de error en español
-        $messages = [
-            'email.required' => 'El campo correo electrónico es obligatorio.',
-            'email.email' => 'Debe ingresar un correo electrónico válido.',
-            'password.required' => 'El campo contraseña es obligatorio.',
-        ];
-
-        // Validar los campos requeridos con los mensajes personalizados
+        // Validar campos
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
-        ], $messages);
-    
-        // Si la validación falla, devolver los errores en formato JSON
+        ]);
+
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()->all()], 422);
         }
-    
-        // Intentar autenticar al usuario con JWTAuth
-        $credentials = $request->only('email', 'password');
-        if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(['message' => 'Credenciales incorrectas, verifique sus datos e intentelo nuevamente'], 401);
+
+        // Intentar autenticar al usuario
+        try {
+            $credentials = $request->only('email', 'password');
+            if (! $token = JWTAuth::attempt($credentials)) {
+                return response()->json(['message' => 'Credenciales incorrectas, verifique sus datos e intentelo nuevamente'], 401);
+            }
+        } catch (JWTException $e) {
+            return response()->json(['message' => 'No se pudo crear el token'], 500);
         }
-    
-        // Obtener el usuario autenticado con su rol
+
+        // Obtener el usuario autenticado
         $user = Auth::user();
-    
-        // Obtener nombre del rol del usuario
+
+        // Obtener nombre del rol del usuario si está definido
         $roleName = $user->roles()->first(); // Suponiendo que la relación de roles está definida en el modelo User
-    
-        // Devolver la respuesta con el usuario, el nombre del rol y el token
-        return response()->json([
+
+        // Construir la respuesta con los datos del usuario y la cookie JWT
+        $response = response()->json([
             'message' => 'Bienvenido, usted ha iniciado sesión.',
             'user' => [
                 'id' => $user->id,
                 'email' => $user->email,
-                'idRole' => $roleName->id,
-                'roleName' => $roleName->name,
-                'roleDescription' => $roleName->description,
+                'idRole' => optional($roleName)->id, // Usar optional para evitar errores si $roleName es null
+                'roleName' => optional($roleName)->name,
+                'roleDescription' => optional($roleName)->description,
             ],
-            'token' => $token,
         ], 200);
-    }    
+
+        // Configurar la cookie con el token JWT
+        $cookie = cookie('jwt_token', $token, config('jwt.ttl')); // 'jwt_token' es el nombre de la cookie
+
+        // Adjuntar la cookie a la respuesta
+        $response->withCookie($cookie);
+
+        return $response;
+    }
+
+    // Obtener usuario autenticado
     public function me()
     {
         return response()->json(Auth::user());
     }
 
+    // Cerrar sesión y eliminar token JWT
     public function logout()
     {
         Auth::logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        // Eliminar la cookie de sesión
+        $cookie = new Cookie('jwt_token', '', time() - 3600); // Expira inmediatamente
+
+        return response()->json(['message' => 'Successfully logged out'])->withCookie($cookie);
     }
 
-    public function refresh()
-    {
-        return response()->json(['token' => JWTAuth::refresh()]);
-    }
-
-    // Validar autenticacion de usuario logueado en el sistema
-    public function getAuthenticatedUser()
-    {
-        try {
-            if (!$user = JWTAuth::parseToken()->authenticate()) {
-                    return response()->json(['user_not_found'], 404);
-            }
-            } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-                return response()->json(['token_expired'], $e->getStatusCode());
-            } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-                return response()->json(['token_invalid'], $e->getStatusCode());
-            } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
-                return response()->json(['token_absent'], $e->getStatusCode());
-            }
-        return response(['user' => $user], Response::HTTP_OK);
-            
-    }
-
+    // Registro de nuevos usuarios
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:users,email', // Añade :email para especificar el campo
             'password' => 'required|string|min:6|confirmed',
         ], [
-            'name.required' => 'El campo nombre es obligatorio.',
-            'email.required' => 'El campo correo electrónico es obligatorio.',
-            'email.email' => 'Debe ingresar un correo electrónico válido.',
-            'email.unique' => 'El :attribute ya está en uso.',
-            'password.required' => 'El campo contraseña es obligatorio.',
-            'password.min' => 'La contraseña debe tener al menos :min caracteres.',
-            'password.confirmed' => 'La confirmación de contraseña no coincide.',
+            'email.unique' => 'El correo electrónico ingresado ya está en uso.', // Mensaje personalizado
         ]);
-    
+
         if ($validator->fails()) {
-            // Obtener todos los mensajes de error como un array
-            $errors = $validator->errors()->all();
-    
-            // Devolver respuesta con los mensajes de error en un array
-            return response()->json(['message' => $errors], 422);
+            return response()->json(['message' => $validator->errors()->all()], 422);
         }
-    
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-    
-        // Devolver respuesta de éxito
-        return response()->json(['success' => 'Registro Exitoso, por favor inicie sesión.'], 201);
+
+        // Crear usuario utilizando el método estático del modelo User
+        User::createUser($request->only('name', 'email', 'password'));
+
+        return response()->json(['success' => 'Registro exitoso, por favor inicie sesión.'], 201);
     }
 }
+

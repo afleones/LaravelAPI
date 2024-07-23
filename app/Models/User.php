@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Role;
 
 class User extends Authenticatable implements JWTSubject 
@@ -49,5 +50,23 @@ class User extends Authenticatable implements JWTSubject
     public function hasRole($roleName)
     {
         return $this->roles()->where('name', $roleName)->exists();
+    }
+    
+    public static function createUser(array $data)
+    {
+        // Crear el usuario
+        $user = static::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+
+        // Asignar el rol por defecto (#2: "customer")
+        $role = Role::find(2); // Obtener el rol con ID #2
+        if ($role) {
+            $user->roles()->attach($role);
+        }
+
+        return $user;
     }
 }

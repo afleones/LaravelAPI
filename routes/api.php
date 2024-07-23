@@ -6,7 +6,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\TeamsController;
 use App\Http\Controllers\StockController;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -32,13 +31,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('user', [AuthController::class, 'getAuthenticatedUser']);
     Route::post('logout', [AuthController::class, 'logout']);
 
-    Route::get('teams', [TeamsController::class, 'index']);
-    Route::post('createTeam', [TeamsController::class, 'create']);
-    Route::post('updateTeam', [TeamsController::class, 'update']);
-    Route::post('deleteTeam', [TeamsController::class, 'delete']);
-
-
 });
-
 
 Route::post('register', [AuthController::class, 'register']); /* Registrarse */
