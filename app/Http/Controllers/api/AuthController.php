@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
-    // Iniciar sesión y generar token JWT
     public function login(Request $request)
     {
         // Validar campos
@@ -23,11 +22,11 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()->all()], 422);
         }
-
+    
         // Intentar autenticar al usuario
         try {
             $credentials = $request->only('email', 'password');
@@ -37,35 +36,31 @@ class AuthController extends Controller
         } catch (JWTException $e) {
             return response()->json(['message' => 'No se pudo crear el token'], 500);
         }
-
+    
         // Obtener el usuario autenticado
         $user = Auth::user();
-
+    
         // Obtener nombre del rol del usuario si está definido
         $roleName = $user->roles()->first(); // Suponiendo que la relación de roles está definida en el modelo User
-
-        // Construir la respuesta con los datos del usuario y la cookie JWT
-        $response = response()->json([
-            'message' => 'Bienvenido, usted ha iniciado sesión.',
-            'user' => [
-                'id' => $user->id,
-                'email' => $user->email,
-                'idRole' => optional($roleName)->id, // Usar optional para evitar errores si $roleName es null
-                'roleName' => optional($roleName)->name,
-                'roleDescription' => optional($roleName)->description,
-            ],
-        ], 200);
-
+    
         // Configurar la cookie con el token JWT
         $cookie = cookie('jwt_token', $token, config('jwt.ttl')); // 'jwt_token' es el nombre de la cookie
-
-        // Adjuntar la cookie a la respuesta
-        $response->withCookie($cookie);
-
-        return $response;
+    
+        // Construir la respuesta con los datos del usuario y la cookie JWT
+        $response = [
+            'id' => $user->id,
+            'email' => $user->email,
+            'idRole' => optional($roleName)->id, // Usar optional para evitar errores si $roleName es null
+            'roleName' => optional($roleName)->name,
+            'roleDescription' => optional($roleName)->description,
+        ];
+    
+        return response()->json([
+            'message' => 'Bienvenido, usted ha iniciado sesión.', 'user' => $response], 200)
+            ->withCookie($cookie);
     }
 
-    // Obtener usuario autenticado
+   // Obtener usuario autenticado
     public function me()
     {
         return response()->json(Auth::user());
