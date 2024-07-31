@@ -11,6 +11,7 @@ use App\Http\Controllers\DesignsController;
 use App\Http\Controllers\AdditionsController;
 use App\Http\Controllers\FillingsController;
 use App\Http\Controllers\FlavorsController;
+use App\Http\Controllers\TypesOfDocumentsIdentificationsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,5 +79,15 @@ Route::middleware('auth:api')->group(function () {
 
 });
 
-Route::post('register', [AuthController::class, 'register']); /* Registrarse */
+/* <! -------  Type of Documents  ------- !> */
+Route::get('typesOfDocumentsIdentification', [TypesOfDocumentsIdentificationsController::class, 'index']);
+/* <! -------  Type of Documents  ------- !> */
+
+/* <! -------  Register  ------- !> */
+Route::post('register', [AuthController::class, 'register']);
+/* <! -------  Register  ------- !> */
+
+
+/* <! -------  Register Customer  ------- !> */
 Route::post('registerCustomer', [UsersController::class, 'store']); /* Registrarse */
+/* <! -------  Register Customer  ------- !> */

@@ -21,7 +21,7 @@ class CustomersSeeder extends Seeder
                 'type_document_id' => 3,
                 'identification_number' => 12345678910,
                 'email' => 'customer@lionstech.co',
-                'phone' => '123-456-7890', // Cambia esto por el número de teléfono que desees
+                'phone' => 1234567890, // Cambia esto por el número de teléfono que desees
                 'state' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
