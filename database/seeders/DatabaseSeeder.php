@@ -12,14 +12,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Llama a cada seeder que deseas ejecutar
-        $this->call(UserSeeder::class);
-        $this->call(RoleSeeder::class);
-        $this->call(UserRolesSeeder::class);
-        $this->call(CategorySeeder::class);
-        $this->call(SupplierSeeder::class);
-        $this->call(ArticleSeeder::class);
-        // Agrega más llamadas aquí según sea necesario para otros seeders
+        $this->call([
+            TypeDocumentsIdentificationsSeeder::class,
+            UserSeeder::class,
+            CategoriesSeeder::class,
+            ArticlesSeeder::class,
+            CategoriesArticlesSeeder::class,
+            FlavorsSeeder::class,
+            RoleSeeder::class,
+            SizesSeeder::class,
+            FillingsSeeder::class,
+            UserRolesSeeder::class,
+            FormsSeeder::class,
+            DesignsSeeder::class,
+            AdditionsSeeder::class,
+            OrdersSeeder::class,
+            CustomersSeeder::class,
+        ]);
 
         $this->command->info('Seeders ejecutados correctamente.');
     } 

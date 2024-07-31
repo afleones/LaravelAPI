@@ -19,22 +19,28 @@ class UserSeeder extends Seeder
             [
                 'id' => 1,
                 'name' => 'admin',
+                'type_document_id' => 3,
+                'identification_number' => 1234567890,
                 'email' => 'admin@lionstech.co',
                 'email_verified_at' => null,
-                'password' => Hash::make('12345678'), // Aquí deberías usar el hash correcto de la contraseña
+                'password' => Hash::make('12345678'),
+                'state' => 1,
                 'remember_token' => null,
-                'created_at' => '2024-05-31 13:46:48',
-                'updated_at' => '2024-06-16 19:11:37',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'id' => 2,
                 'name' => 'customer',
+                'type_document_id' => 3,
+                'identification_number' => 12345678910,
                 'email' => 'customer@lionstech.co',
                 'email_verified_at' => null,
-                'password' => Hash::make('12345678'), // Aquí deberías usar el hash correcto de la contraseña
+                'password' => Hash::make('12345678'),
+                'state' => 1,
                 'remember_token' => null,
-                'created_at' => '2024-05-31 13:46:48',
-                'updated_at' => '2024-05-31 13:46:48',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
         ]);
     }

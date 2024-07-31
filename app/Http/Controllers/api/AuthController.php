@@ -56,7 +56,7 @@ class AuthController extends Controller
         ];
     
         return response()->json([
-            'message' => 'Bienvenido, usted ha iniciado sesión.', 'user' => $response], 200)
+            'message' => 'Bienvenido, usted ha iniciado sesión.', 'user' => $response, 'token'=>$token], 200)
             ->withCookie($cookie);
     }
 

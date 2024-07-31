@@ -19,7 +19,7 @@ class User extends Authenticatable implements JWTSubject
     protected $table = 'users';  // Especifica el nombre de la tabla
     
     protected $fillable = [
-        'name', 'email', 'password', // Agrega los campos name, email y password aquí
+        'name', 'type_document_id', 'identification_number', 'email', 'password', // Agrega los campos name, email y password aquí
     ];
     protected $hidden = [
         'password',
@@ -43,13 +43,18 @@ class User extends Authenticatable implements JWTSubject
 
     public function roles()
     {
-        return $this->belongsToMany(Role::class);
-    }
+        return $this->belongsToMany(Role::class, 'roles_users', 'user_id', 'role_id');
+    }    
 
     // valida el rol del usuario al iniciar sesion
     public function hasRole($roleName)
     {
         return $this->roles()->where('name', $roleName)->exists();
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'id_user');
     }
     
     public static function createUser(array $data)

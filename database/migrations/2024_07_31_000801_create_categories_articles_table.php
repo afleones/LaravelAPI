@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('suppliers', function (Blueprint $table) {
+        Schema::create('categories_articles', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('nit')->unique();
-            $table->string('phone');
-            $table->string('email');
-            $table->string('address');
-            $table->boolean('state');
+            $table->foreignId('id_category')->constrained('categories')->onDelete('no action')->onUpdate('no action');
+            $table->foreignId('id_article')->constrained('articles')->onDelete('no action')->onUpdate('no action');
+            $table->boolean('state')->default(true);
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('table_suppliers');
+        Schema::dropIfExists('categories_articles');
     }
 };

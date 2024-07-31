@@ -13,14 +13,14 @@ class RoleSeeder extends Seeder
         DB::table('roles')->insert([
             [
                 'name' => 'admin',
-                'description' => 'Administrator role with full access.',
+                'description' => 'Rol de administrador con acceso total.',
                 'state' => 1, // 1 activo, 0 inactivo
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
                 'name' => 'customer',
-                'description' => 'Customer role with limited access.',
+                'description' => 'Rol de cliente, solo para comprar.',
                 'state' => 1, // 1 activo, 0 inactivo
                 'created_at' => now(),
                 'updated_at' => now()

@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('articles', function (Blueprint $table) {
+        Schema::create('type_documents_identifications', function (Blueprint $table) {
             $table->id();
             $table->string('name', 45);
-            $table->string('description', 45)->default('SIN DESCRIPCION')->nullable();
-            $table->boolean('state')->default(true);
+            $table->boolean('state')->default(true);            
             $table->timestamps();
         });
     }
+
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('type_documents_identifications');
     }
 };

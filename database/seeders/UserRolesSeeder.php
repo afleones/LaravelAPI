@@ -14,7 +14,7 @@ class UserRolesSeeder extends Seeder
         $customerRoleId = DB::table('roles')->where('name', 'customer')->value('id');
 
         // Asignar roles a usuarios específicos
-        DB::table('role_user')->insert([
+        DB::table('roles_users')->insert([
             [
                 'role_id' => $adminRoleId,
                 'user_id' => 1, // Asignar al usuario con id 1 el rol de admin

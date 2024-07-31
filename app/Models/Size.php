@@ -4,22 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 
-class Role extends Model
+class Size extends Model
 {
     use HasFactory;
 
-    protected $table = 'roles';
+    protected $table = 'sizes';
 
     protected $fillable = [
         'name',
-        'description',
+        'price',
         'state',
     ];
 
-    public function users()
+    public function orders()
     {
-        return $this->belongsToMany(User::class);
+        return $this->hasMany(Order::class, 'id_size');
     }
 }

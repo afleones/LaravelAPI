@@ -4,22 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 
-class Role extends Model
+class Customer extends Model
 {
     use HasFactory;
 
-    protected $table = 'roles';
+    protected $table = 'customers';
 
     protected $fillable = [
         'name',
-        'description',
+        'type_document_id',
+        'identification_number',
+        'email',
+        'address',
+        'phone',
         'state',
     ];
-
-    public function users()
-    {
-        return $this->belongsToMany(User::class);
-    }
 }

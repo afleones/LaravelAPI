@@ -4,22 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 
-class Role extends Model
+class Form extends Model
 {
     use HasFactory;
 
-    protected $table = 'roles';
+    protected $table = 'forms';
 
     protected $fillable = [
         'name',
-        'description',
         'state',
     ];
 
-    public function users()
+    public function orders()
     {
-        return $this->belongsToMany(User::class);
+        return $this->hasMany(Order::class, 'id_form');
     }
 }

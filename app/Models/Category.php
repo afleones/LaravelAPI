@@ -12,24 +12,15 @@ class Category extends Model
 
     protected $table = 'categories';
 
-    protected $fillable = ['name', 'serial', 'supplier', 'quantities', 'category_id', 'supplier_id', 'state'];
-
-    public function articles()
+    // Relación con el modelo CategorieArticle
+    public function categoryArticles()
     {
-        return $this->hasMany(Article::class, 'category_id', 'id');
+        return $this->hasMany(CategorieArticle::class, 'id_category');
     }
 
-    public static function storeArticle($data)
+    // Relación con el modelo Article a través de CategorieArticle
+    public function articles()
     {
-        // Crea un nuevo artículo con los datos proporcionados
-        return self::create([
-            'name' => $data['name'],
-            'serial' => $data['serial'],
-            'supplier' => $data['supplier'],
-            'quantities' => $data['quantities'],
-            'category_id' => $data['category_id'],
-            'supplier_id' => $data['supplier_id'],
-            'state' => $data['state'],
-        ]);
+        return $this->hasManyThrough(Article::class, CategorieArticle::class, 'id_category', 'id', 'id', 'id_article');
     }
 }
