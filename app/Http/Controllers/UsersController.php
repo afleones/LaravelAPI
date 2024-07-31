@@ -32,7 +32,7 @@ class UsersController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
             'address' => 'required|string|max:191',
-            'phone' => 'nullable|numeric|digits_between:7,15',
+            'phone' => 'nullable|numeric',
         ]);
 
         if ($validator->fails()) {
