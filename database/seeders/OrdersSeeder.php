@@ -48,7 +48,11 @@ class OrdersSeeder extends Seeder
                 'total_tax' => 0.00,
                 'total_discount' => 1000.00,
                 'total_order' => 9000.00,
-                'state' => 1
+                'date_order' => '2024-07-31',
+                'time_order' => '04:30',
+                'state' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'id_category_article' => $categoryArticleIds[array_rand($categoryArticleIds)],
@@ -63,6 +67,8 @@ class OrdersSeeder extends Seeder
                 'total_discount' => 5000.00,
                 'total_order' => 10000.00,
                 'state' => 1,
+                'date_order' => '2024-07-31',
+                'time_order' => '04:30',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

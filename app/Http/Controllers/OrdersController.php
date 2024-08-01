@@ -11,7 +11,7 @@ class OrdersController extends Controller
 {
     public function store(Request $request)
     {
-        // Validar los datos del request
+        // Validar los datos del request, incluyendo la imagen
         $validated = $request->validate([
             'id_category_article' => 'required|exists:categories_articles,id',
             'id_user' => 'required|exists:users,id',
@@ -28,14 +28,15 @@ class OrdersController extends Controller
             'total_discount' => 'nullable|numeric',
             'total_order' => 'required|numeric',
             'state' => 'boolean',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validación para la imagen
         ]);
-
+    
         // Iniciar una transacción
         DB::beginTransaction();
-        
+    
         try {
             // Crear el pedido
-            $order = Order::create([
+            $orderData = [
                 'id_category_article' => $validated['id_category_article'],
                 'id_user' => $validated['id_user'],
                 'id_size' => $validated['id_size'],
@@ -48,8 +49,18 @@ class OrdersController extends Controller
                 'total_discount' => $validated['total_discount'],
                 'total_order' => $validated['total_order'],
                 'state' => $validated['state'],
-            ]);
-
+            ];
+    
+            // Verificar si hay una imagen y procesarla
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imagePath = $image->store('images', 'public'); // Guarda la imagen en el directorio public/images
+                $orderData['image'] = $imagePath; // Agrega la ruta de la imagen a los datos del pedido
+            }
+    
+            $order = Order::create($orderData);
+    
             // Procesar adiciones
             $additions = $validated['additions'];
             foreach ($additions as $addition) {
@@ -60,10 +71,18 @@ class OrdersController extends Controller
                     'state' => true, // o lo que necesites para el estado
                 ]);
             }
-
+    
+            // Guardar la información del archivo en la tabla `files` si se subió una imagen
+            if ($imagePath) {
+                File::create([
+                    'id_order' => $order->id,
+                    'path' => $imagePath,
+                ]);
+            }
+    
             // Confirmar transacción
             DB::commit();
-
+    
             return response()->json(['message' => 'Order created successfully'], 201);
         } catch (\Illuminate\Database\QueryException $e) {
             // Capturar errores específicos de la base de datos
@@ -75,7 +94,7 @@ class OrdersController extends Controller
             return response()->json(['error' => 'Failed to create order', 'message' => $e->getMessage()], 500);
         }
     }
-
+        
     public function index(Request $request)
     {
         // Paso 1: Consultar todas las Órdenes desde la Vista orders_view

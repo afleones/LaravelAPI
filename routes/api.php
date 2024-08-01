@@ -12,6 +12,7 @@ use App\Http\Controllers\AdditionsController;
 use App\Http\Controllers\FillingsController;
 use App\Http\Controllers\FlavorsController;
 use App\Http\Controllers\TypesOfDocumentsIdentificationsController;
+use App\Http\Controllers\PaymentsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,11 +28,14 @@ use App\Http\Controllers\TypesOfDocumentsIdentificationsController;
 Route::post('login', [AuthController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
+
+    /* <! -------  User Routes  ------- !> */
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('user', [AuthController::class, 'getAuthenticatedUser']);
     Route::post('logout', [AuthController::class, 'logout']);
+    /* <! -------  User Routes  ------- !> */
 
     /* <! -------  Orders  ------- !> */
     Route::post('storeOrder', [OrdersController::class, 'store']);
@@ -76,6 +80,8 @@ Route::middleware('auth:api')->group(function () {
     /* <! -------  Flavors  ------- !> */
     Route::get('flavors', [FlavorsController::class, 'index']);
     /* <! -------  Flavors  ------- !> */
+
+    Route::post('pay', [PaymentsController::class, 'pay']);
 
 });
 

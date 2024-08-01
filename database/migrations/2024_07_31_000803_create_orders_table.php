@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('id_category_article')->constrained('categories_articles')->onDelete('no action')->onUpdate('no action');
             $table->foreignId('id_user')->constrained('users')->onDelete('no action')->onUpdate('no action');
+            $table->text('delivery_address')->nullable();            
             $table->foreignId('id_size')->nullable()->constrained('sizes')->onDelete('no action')->onUpdate('no action');
             $table->foreignId('id_flavor')->nullable()->constrained('flavors')->onDelete('no action')->onUpdate('no action');
             $table->foreignId('id_form')->nullable()->constrained('forms')->onDelete('no action')->onUpdate('no action');
@@ -24,6 +25,8 @@ return new class extends Migration
             $table->decimal('total_tax', 15, 2)->default(0.00)->nullable();
             $table->decimal('total_discount', 15, 2)->default(0.00)->nullable();
             $table->decimal('total_order', 15, 2)->default(0.00);
+            $table->date('date_order');
+            $table->time('time_order');
             $table->boolean('state')->default(true);
             $table->timestamps();
         });
