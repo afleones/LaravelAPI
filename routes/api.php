@@ -40,7 +40,8 @@ Route::middleware('auth:api')->group(function () {
     /* <! -------  Orders  ------- !> */
     Route::post('storeOrder', [OrdersController::class, 'store']);
     Route::get('orders', [OrdersController::class, 'index']);
-    Route::get('order', [OrdersController::class, 'show']);
+    Route::get('ordersByUser', [OrdersController::class, 'show']);
+    Route::get('showOrder', [OrdersController::class, 'showOrder']);
     /* <! -------  Orders  ------- !> */
 
 // -------------------------------------------------------------------------
@@ -80,6 +81,10 @@ Route::middleware('auth:api')->group(function () {
     /* <! -------  Flavors  ------- !> */
     Route::get('flavors', [FlavorsController::class, 'index']);
     /* <! -------  Flavors  ------- !> */
+
+    /* <! -------  CategorieArticles  ------- !> */
+    Route::get('showCategorieArticles', [OrdersController::class, 'showCategorieArticles']);
+    /* <! -------  CategorieArticles  ------- !> */
 
     Route::post('pay', [PaymentsController::class, 'pay']);
 

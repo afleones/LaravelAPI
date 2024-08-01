@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderAddition;
+use App\Models\CategoryArticle;
 use Illuminate\Support\Facades\DB;
 
 class OrdersController extends Controller
@@ -230,4 +231,114 @@ class OrdersController extends Controller
         
         return response()->json($ordersWithAdditions);
     }
+
+    public function showOrder(Request $request)
+    {
+        $data = $request->all();
+        $order_id = $data['order_id']; // ID de la orden que queremos buscar
+        
+        // Paso 1: Consultar la Orden desde la Vista orders_view según el ID de la orden
+        $order = DB::table('orders_view')
+            ->where('id', $order_id)
+            ->first(); // Usa first() para obtener solo un registro
+        
+        if (!$order) {
+            return response()->json(['error' => 'Orden no encontrada'], 404);
+        }
+        
+        // Paso 2: Consultar todas las Adiciones desde additions_view para la orden específica
+        $orderAdditions = DB::table('additions_view')
+            ->where('id_order', $order_id)
+            ->get()
+            ->map(function ($addition) {
+                // Calcula el totalAddition
+                $addition->totalAddition = $addition->price * $addition->quantity;
+                return $addition;
+            });
+        
+        // Paso 3: Consultar archivos asociados a la orden específica
+        $files = DB::table('files')
+            ->where('id_order', $order_id)
+            ->get();
+        
+        // Generar las URLs de las imágenes
+        $filesWithUrls = $files->map(function ($file) {
+            // Suponiendo que las imágenes están almacenadas en 'storage/app/public', la URL sería:
+            $url = asset('storage/' . $file->path);
+            return [
+                'id' => $file->id,
+                'path' => $file->path,
+                'url' => $url, // URL completa de la imagen
+            ];
+        });
+
+        // Calcula el totalAddition como la suma de todas las adiciones
+        $totalAddition = $orderAdditions->sum('totalAddition');
+        
+        // Calcula subtotal_order
+        $subtotalOrder = $order->price_size + $order->total_tax + $totalAddition;
+        
+        // Calcula total_order
+        $totalOrder = $subtotalOrder - $order->total_discount;
+        
+        // Formatea la orden
+        $orderWithDetails = [
+            'order_id' => $order->id,
+            'customer_name' => $order->customer_name,
+            'type_document_id' => $order->type_document_id,
+            'identification_number' => $order->identification_number,
+            'email' => $order->email,
+            'phone' => $order->phone,
+            'id_category' => $order->id_category,
+            'category_name' => $order->category_name,
+            'article_id' => $order->article_id,
+            'article_name' => $order->article_name,
+            'id_size' => $order->id_size,
+            'size_name' => $order->size_name,
+            'price_size' => $order->price_size,
+            'id_flavor' => $order->id_flavor,
+            'flavor_name' => $order->flavor_name,
+            'id_form' => $order->id_form,
+            'form_name' => $order->form_name,
+            'id_filling' => $order->id_filling,
+            'filling_name' => $order->filling_name,
+            'id_design' => $order->id_design,
+            'design_name' => $order->design_name,
+            'subtotal_order' => $subtotalOrder,
+            'total_tax' => $order->total_tax,
+            'total_discount' => $order->total_discount,
+            'total_order' => $totalOrder,
+            'state' => $order->state,
+            'additions' => $orderAdditions->map(function ($orderAddition) {
+                return [
+                    'id' => $orderAddition->id,
+                    'id_addition' => $orderAddition->id_addition,
+                    'addition_name' => $orderAddition->name,
+                    'addition_price' => $orderAddition->price,
+                    'quantity' => $orderAddition->quantity,
+                    'totalAddition' => $orderAddition->totalAddition
+                ];
+            })->all(),
+            'files' => $filesWithUrls // Incluye la URL de la imagen en la respuesta
+        ];
+        
+        return response()->json($orderWithDetails);
+    }
+
+    public function showCategorieArticles(Request $request)
+    {
+        $results = DB::table('categories_articles as car')
+            ->join('categories as cat', 'cat.id', '=', 'car.id_category')
+            ->join('articles as art', 'art.id', '=', 'car.id_article')
+            ->select(
+            'car.id as id_category_article',
+            'car.id_category',
+            'cat.name as name_category',
+            'car.id_article as id_article',
+            'art.name as name_article'
+        )->get();
+
+        return response()->json(['CategoriesArticles' => $results]);
+    }
+
 }
